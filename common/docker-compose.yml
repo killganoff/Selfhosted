@@ -1,0 +1,30 @@
+version: '3.5'
+
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    restart: unless-stopped
+    volumes:
+      - jellyfin-config:/config
+      - jellyfin-cache:/cache
+      #- /path/to/media:/media
+    # network_mode: "host"
+  
+  bitwarden:
+    image: bitwardenrs/server
+    restart: unless-stopped
+    volumes:
+        - bitwarden:/data
+    environment:
+      SIGNUPS_ALLOWED: "true"
+      WEBSOCKET_ENABLED: "true"
+
+volumes:
+  jellyfin-config:
+  jellyfin-cache:
+  bitwarden:
+
+networks:
+  default:
+    external:
+      name: public

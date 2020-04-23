@@ -1,0 +1,4 @@
+.env
+production.yml
+archived/*
+auth.passwd

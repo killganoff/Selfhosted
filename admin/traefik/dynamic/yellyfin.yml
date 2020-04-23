@@ -1,0 +1,22 @@
+ http:
+  routers:
+    jellyfin-https:
+      rule: Host(`jellyfin.domain.tld`)
+      entryPoints:
+        - https
+      service: jellyfin
+      tls: {}
+    
+    jellyfin-redirect:
+      rule: Host(`jellyfin.domain.tld`)
+      entryPoints:
+        - http
+      service: jellyfin
+      middlewares:
+        - https-redirect
+
+  services:
+    jellyfin:
+      loadBalancer:
+        servers:
+        - url: http://jellyfin:8096

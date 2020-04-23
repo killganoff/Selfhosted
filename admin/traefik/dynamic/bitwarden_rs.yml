@@ -1,0 +1,41 @@
+ http:
+  routers:
+    bitwarden-ui-https:
+      rule: Host(`bitwarden.domain.tld`)
+      entryPoints:
+        - https
+      service: bitwarden-ui
+      tls: {}
+    
+    bitwarden-ui-redirect:
+      rule: Host(`bitwarden.domain.tld`)
+      entryPoints:
+        - http
+      service: bitwarden-ui
+      middlewares:
+        - https-redirect
+
+    bitwarden-websocket-https:
+      rule: Host(`bitwarden.domain.tld`) && Path(`/notifications/hub`)
+      entryPoints:
+        - https
+      service: bitwarden-websocket
+      tls: {}
+    
+    bitwarden-websocket-redirect:
+      rule: Host(`bitwarden.domain.tld`) && Path(`/notifications/hub`)
+      entryPoints:
+        - http
+      service: bitwarden-websocket
+      middlewares:
+        - https-redirect
+
+  services:
+    bitwarden-ui:
+      loadBalancer:
+        servers:
+        - url: http://bitwarden:80
+    bitwarden-websocket:
+      loadBalancer:
+        servers:
+        -url: http://bitwarden:3012

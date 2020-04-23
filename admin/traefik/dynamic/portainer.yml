@@ -1,0 +1,14 @@
+ http:
+  routers:
+    portainer-https:
+      rule: Host(`portainer.domain.tld`)
+      entryPoints:
+        - internal
+      service: portainer
+      tls: {}
+
+  services:
+    portainer:
+      loadBalancer:
+        servers:
+        - url: http://portainer:9000

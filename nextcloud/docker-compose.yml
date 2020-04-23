@@ -1,0 +1,57 @@
+version: '3.5'
+
+services:
+  db:
+    image: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: unless-stopped
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+  redis:
+    image: redis
+    restart: unless-stopped
+    volumes:
+      - redis:/data
+    
+  app:
+    image: nextcloud:fpm
+    restart: unless-stopped
+    volumes:
+      - nextcloud:/var/www/html
+    environment:
+      - REDIS_HOST=redis
+      - MYSQL_HOST=db
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    depends_on:
+      - db
+      - redis
+
+  web:
+    container_name: nextcloud_web
+    build: ./web
+    restart: unless-stopped
+    volumes:
+      - nextcloud:/var/www/html:ro
+    depends_on:
+      - app
+    networks:
+      - public
+      - default
+
+volumes:
+  redis:
+  db:
+  nextcloud:
+
+networks:
+  public:
+    external: true
+    name: public
