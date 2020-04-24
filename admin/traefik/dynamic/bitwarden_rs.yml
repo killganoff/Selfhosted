@@ -5,7 +5,11 @@
       entryPoints:
         - https
       service: bitwarden-ui
-      tls: {}
+      middlewares:
+        - security-headers
+      tls:
+        certResolver: letsencrypt
+        options: modern
     
     bitwarden-ui-redirect:
       rule: Host(`bitwarden.domain.tld`)
@@ -20,7 +24,11 @@
       entryPoints:
         - https
       service: bitwarden-websocket
-      tls: {}
+      middlewares:
+        - security-headers
+      tls:
+        certResolver: letsencrypt
+        options: modern
     
     bitwarden-websocket-redirect:
       rule: Host(`bitwarden.domain.tld`) && Path(`/notifications/hub`)

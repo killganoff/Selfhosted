@@ -5,7 +5,11 @@
       entryPoints:
         - https
       service: jellyfin
-      tls: {}
+      middlewares:
+        - security-headers
+      tls:
+        certResolver: letsencrypt
+        options: modern
     
     jellyfin-redirect:
       rule: Host(`jellyfin.domain.tld`)

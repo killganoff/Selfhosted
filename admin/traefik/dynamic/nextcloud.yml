@@ -8,7 +8,9 @@
       middlewares:
         - nextcloud-dav-redirect
         - security-headers
-      tls: {}
+      tls:
+        certResolver: letsencrypt
+        options: modern
     
     nextcloud-redirect:
       rule: Host(`nextcloud.domain.tld`)
