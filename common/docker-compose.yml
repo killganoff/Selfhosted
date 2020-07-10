@@ -2,6 +2,8 @@ version: '3.5'
 
 services:
   jellyfin:
+    container_name: jellyfin
+    hostname: jellyfin
     image: jellyfin/jellyfin
     restart: unless-stopped
     volumes:
@@ -9,16 +11,59 @@ services:
       - jellyfin-cache:/cache
       #- /path/to/media:/media
     # network_mode: "host"
-  
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.jellyfin-service.loadbalancer.server.port=8096"
+      # Redirect
+      - "traefik.http.routers.jellyfin-redirect.rule=Host(`jellyfin.${PUBLIC_DOMAIN}`)"
+      - "traefik.http.routers.jellyfin-redirect.entrypoints=http"
+      - "traefik.http.routers.jellyfin-redirect.middlewares=https-redirect@file"
+      - "traefik.http.routers.jellyfin-redirect.service=jellyfin-service"
+      # Router
+      - "traefik.http.routers.jellyfin-router.rule=Host(`jellyfin.${PUBLIC_DOMAIN}`)"
+      - "traefik.http.routers.jellyfin-router.entrypoints=https"
+      - "traefik.http.routers.jellyfin-router.middlewares=security-headers@file"
+      - "traefik.http.routers.jellyfin-router.service=jellyfin-service"
+      - "traefik.http.routers.jellyfin-router.tls.certresolver=letsencrypt"
+      
   bitwarden:
+    container_name: bitwarden
+    hostname: bitwarden
     image: bitwardenrs/server
     restart: unless-stopped
     volumes:
-        - bitwarden:/data
+      - bitwarden:/data
     environment:
       SIGNUPS_ALLOWED: "true"
       WEBSOCKET_ENABLED: "true"
-
+    labels:
+      - "traefik.enable=true"
+      # Services
+      - "traefik.http.services.bitwarden-ui.loadbalancer.server.port=80"
+      - "traefik.http.services.bitwarden-websocket.loadbalancer.server.port=3012"
+      # UI redirect
+      - "traefik.http.routers.bitwarden-ui-redirect.rule=Host(`bitwarden.${PUBLIC_DOMAIN}`)"
+      - "traefik.http.routers.bitwarden-ui-redirect.entrypoints=http"
+      - "traefik.http.routers.bitwarden-ui-redirect.middlewares=https-redirect@file"
+      - "traefik.http.routers.bitwarden-ui-redirect.service=bitwarden-ui"
+      # UI router
+      - "traefik.http.routers.bitwarden-ui-router.rule=Host(`bitwarden.${PUBLIC_DOMAIN}`)"
+      - "traefik.http.routers.bitwarden-ui-router.entrypoints=https"
+      - "traefik.http.routers.bitwarden-ui-router.middlewares=security-headers@file"
+      - "traefik.http.routers.bitwarden-ui-router.service=bitwarden-ui"
+      - "traefik.http.routers.bitwarden-ui-router.tls.certresolver=letsencrypt"
+      # Websocket redirect
+      - "traefik.http.routers.bitwarden-websocket-redirect.rule=Host(`bitwarden.${PUBLIC_DOMAIN}`) && Path(`/notifications/hub`)"
+      - "traefik.http.routers.bitwarden-websocket-redirect.entrypoints=http"
+      - "traefik.http.routers.bitwarden-websocket-redirect.middlewares=https-redirect@file"
+      - "traefik.http.routers.bitwarden-websocket-redirect.service=bitwarden-websocket"
+      # Websocket router
+      - "traefik.http.routers.bitwarden-websocket-router.rule=Host(`bitwarden.${PUBLIC_DOMAIN}`) && Path(`/notifications/hub`)"
+      - "traefik.http.routers.bitwarden-websocket-router.entrypoints=https"
+      - "traefik.http.routers.bitwarden-websocket-router.middlewares=security-headers@file"
+      - "traefik.http.routers.bitwarden-websocket-router.service=bitwarden-websocket"
+      - "traefik.http.routers.bitwarden-websocket-router.tls.certresolver=letsencrypt"
+      
 volumes:
   jellyfin-config:
   jellyfin-cache:

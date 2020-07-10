@@ -36,5 +36,3 @@ http:
         stsPreload: true
         contentTypeNosniff: true
         browserXssFilter: true
-
-        

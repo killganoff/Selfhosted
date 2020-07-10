@@ -3,7 +3,7 @@ version: '3.5'
 services:
   
   traefik:
-    image: traefik:v2.1.2
+    image: traefik:v2.2
     restart: unless-stopped
     ports:
       - "80:80"
@@ -16,6 +16,37 @@ services:
     networks:
       - public
       - default
+    command:
+      # Logs
+      - "--log.level=INFO"
+      - "--log.filePath=/var/traefik/logs/traefik.log"
+      - "--accesslog=true"
+      - "--accesslog.filepath=/path/to/access.log"
+      # Api
+      - "--api.insecure=false"
+      - "--api.dashboard=true"
+      # Providers
+      - "--providers.file.filename=/etc/traefik/common.yml"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.network=public"
+      # Entrypoints
+      - "--entryPoints.http.address=:80"
+      - "--entryPoints.https.address=:443"
+      - "--entryPoints.internal.address=:8443"
+      # Certificate Resolvers
+      - "--certificatesresolvers.letsencrypt.acme.email=${LETSENCRYPT_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/var/traefik/certs/acme.json"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.traefik.entrypoints=internal"
+      - "traefik.http.routers.traefik.middlewares=auth@file"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.tls=true"
 
   portainer:
     image: portainer/portainer
@@ -23,6 +54,13 @@ services:
     volumes:
       - portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.portainer.entrypoints=internal"
+      - "traefik.http.routers.portainer.tls=true"
 
 volumes:
   traefik:

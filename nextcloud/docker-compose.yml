@@ -45,6 +45,24 @@ services:
     networks:
       - public
       - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.nextcloud-router.loadbalancer.server.port=80"
+      # Middlewares
+      - "traefik.http.middlewares.nextcloud-dav-redirect.redirectregex.permanent=true"
+      - "traefik.http.middlewares.nextcloud-dav-redirect.redirectregex.regex=http://(.*)/.well-known/(card|cal)dav"
+      - "traefik.http.middlewares.nextcloud-dav-redirect.redirectregex.replacement=http://$$1/remote.php/dav/"
+      # Redirect
+      - "traefik.http.routers.nextcloud-redirect.rule=Host(`nextcloud.${PUBLIC_DOMAIN}`)"
+      - "traefik.http.routers.nextcloud-redirect.entrypoints=http"
+      - "traefik.http.routers.nextcloud-redirect.middlewares=https-redirect@file"
+      - "traefik.http.routers.nextcloud-redirect.service=nextcloud-router"
+      # Router
+      - "traefik.http.routers.nextcloud-router.rule=Host(`nextcloud.${PUBLIC_DOMAIN}`)"
+      - "traefik.http.routers.nextcloud-router.entrypoints=https"
+      - "traefik.http.routers.nextcloud-router.middlewares=security-headers@file, nextcloud-dav-redirect@docker"
+      - "traefik.http.routers.nextcloud-router.service=nextcloud-router"
+      - "traefik.http.routers.nextcloud-router.tls.certresolver=letsencrypt"
 
 volumes:
   redis:
