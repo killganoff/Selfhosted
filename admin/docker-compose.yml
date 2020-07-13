@@ -21,7 +21,7 @@ services:
       - "--log.level=INFO"
       - "--log.filePath=/var/traefik/logs/traefik.log"
       - "--accesslog=true"
-      - "--accesslog.filepath=/path/to/access.log"
+      - "--accesslog.filepath=/var/traefik/logs/access.log"
       # Api
       - "--api.insecure=false"
       - "--api.dashboard=true"
@@ -38,7 +38,7 @@ services:
       # Certificate Resolvers
       - "--certificatesresolvers.letsencrypt.acme.email=${LETSENCRYPT_EMAIL}"
       - "--certificatesresolvers.letsencrypt.acme.storage=/var/traefik/certs/acme.json"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
 
     labels:
       - "traefik.enable=true"
