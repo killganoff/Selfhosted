@@ -35,8 +35,15 @@ services:
       - "--providers.docker.network=public"
       # Entrypoints
       - "--entryPoints.http.address=:80"
+      - "--entrypoints.http.http.redirections.entryPoint.to=https"
+      - "--entrypoints.http.http.redirections.entryPoint.scheme=https"
       - "--entryPoints.https.address=:443"
+      - "--entrypoints.https.http.tls=true"
+      - "--entrypoints.https.http.tls.options=modern"
+      - "--entrypoints.https.http.tls.certResolver=letsencryptr"
+      - "--entrypoints.https.http.middlewares=security-headers@file"
       - "--entryPoints.internal.address=:8443"
+      - "--entrypoints.internal.http.tls=true"
       # Certificate Resolvers
       - "--certificatesresolvers.letsencrypt.acme.email=${LETSENCRYPT_EMAIL}"
       - "--certificatesresolvers.letsencrypt.acme.storage=/var/traefik/certs/acme.json"
@@ -48,7 +55,6 @@ services:
       - "traefik.http.routers.traefik.entrypoints=internal"
       - "traefik.http.routers.traefik.middlewares=auth@file"
       - "traefik.http.routers.traefik.service=api@internal"
-      - "traefik.http.routers.traefik.tls=true"
 
   portainer:
     image: portainer/portainer
@@ -62,4 +68,3 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.portainer.rule=Host(`portainer.${LOCAL_DOMAIN:-lan}`)"
       - "traefik.http.routers.portainer.entrypoints=internal"
-      - "traefik.http.routers.portainer.tls=true"
