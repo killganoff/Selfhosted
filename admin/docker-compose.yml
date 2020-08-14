@@ -1,7 +1,11 @@
 version: '3.5'
 
+networks:
+  public:
+    external: false
+    name: public
+
 services:
-  
   traefik:
     image: traefik:v2.2
     restart: unless-stopped
@@ -12,10 +16,9 @@ services:
     volumes:
       - ./traefik:/etc/traefik
       - /var/run/docker.sock:/var/run/docker.sock
-      - traefik:/var/traefik
+      - /srv/data/traefik:/var/traefik
     networks:
       - public
-      - default
     command:
       # Logs
       - "--log.level=INFO"
@@ -23,10 +26,9 @@ services:
       - "--accesslog=true"
       - "--accesslog.filepath=/var/traefik/logs/access.log"
       # Api
-      - "--api.insecure=false"
       - "--api.dashboard=true"
       # Providers
-      - "--providers.file.filename=/etc/traefik/common.yml"
+      - "--providers.file.filename=/etc/traefik/security.yml"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.endpoint=unix:///var/run/docker.sock"
@@ -42,7 +44,7 @@ services:
 
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${LOCAL_DOMAIN:-lan}`)"
       - "traefik.http.routers.traefik.entrypoints=internal"
       - "traefik.http.routers.traefik.middlewares=auth@file"
       - "traefik.http.routers.traefik.service=api@internal"
@@ -52,21 +54,12 @@ services:
     image: portainer/portainer
     restart: unless-stopped
     volumes:
-      - portainer:/data
+      - /srv/data/portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - public
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.portainer.rule=Host(`portainer.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.${LOCAL_DOMAIN:-lan}`)"
       - "traefik.http.routers.portainer.entrypoints=internal"
       - "traefik.http.routers.portainer.tls=true"
-
-volumes:
-  traefik:
-  portainer:
-
-networks:
-  public:
-    external: false
-    name: public

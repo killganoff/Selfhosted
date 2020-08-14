@@ -21,7 +21,7 @@ http:
 
     auth:
       basicAuth:
-        usersFile: /etc/traefik/auth.passwd
+        usersFile: /var/traefik/auth.passwd
 
     https-redirect:
       redirectScheme:
