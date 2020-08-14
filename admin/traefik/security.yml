@@ -1,4 +1,9 @@
 tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /var/traefik/certs/selfhosted.crt
+        keyFile: /var/traefik/certs/selfhosted.key
   options:
     # https://ssl-config.mozilla.org/
     # General-purpose servers with a variety of clients, recommended for almost all systems

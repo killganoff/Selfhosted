@@ -16,7 +16,7 @@ services:
     volumes:
       - ./traefik:/etc/traefik
       - /var/run/docker.sock:/var/run/docker.sock
-      - /srv/data/traefik:/var/traefik
+      - ${DATA_DIR:-/srv/data}/traefik:/var/traefik
     networks:
       - public
     command:
@@ -54,7 +54,7 @@ services:
     image: portainer/portainer
     restart: unless-stopped
     volumes:
-      - /srv/data/portainer:/data
+      - ${DATA_DIR:-/srv/data}/portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - public
