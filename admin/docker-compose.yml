@@ -39,15 +39,15 @@ services:
       - "--entrypoints.http.http.redirections.entryPoint.scheme=https"
       - "--entryPoints.https.address=:443"
       - "--entrypoints.https.http.tls=true"
-      - "--entrypoints.https.http.tls.options=modern"
-      - "--entrypoints.https.http.tls.certResolver=letsencryptr"
-      - "--entrypoints.https.http.middlewares=security-headers@file"
       - "--entryPoints.internal.address=:8443"
       - "--entrypoints.internal.http.tls=true"
-      # Certificate Resolvers
+      # Let's Encrypt
+      - "--entrypoints.https.http.tls.options=modern@file"
+      - "--entrypoints.https.http.tls.certResolver=letsencrypt"
+      - "--entrypoints.https.http.middlewares=security-headers@file"
       - "--certificatesresolvers.letsencrypt.acme.email=${LETSENCRYPT_EMAIL}"
       - "--certificatesresolvers.letsencrypt.acme.storage=/var/traefik/certs/acme.json"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
 
     labels:
       - "traefik.enable=true"
