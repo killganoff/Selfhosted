@@ -1,0 +1,11 @@
+version: '3.5'
+
+services:
+  traefik:
+    command:
+      - "--entrypoints.https.http.tls.options=modern"
+      - "--entrypoints.https.http.tls.certResolver=letsencrypt"
+      - "--entrypoints.https.http.middlewares=security-headers@file"
+      - "--certificatesresolvers.letsencrypt.acme.email=${LETSENCRYPT_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/var/traefik/certs/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"

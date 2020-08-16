@@ -4,6 +4,9 @@ networks:
   default:
     external:
       name: public
+  postgres:
+    external:
+      name: postgres
 
 services:
   jellyfin:
@@ -47,3 +50,27 @@ services:
       - "traefik.http.routers.bitwarden-websocket-router.rule=Host(`bitwarden.${PUBLIC_DOMAIN}`) && Path(`/notifications/hub`)"
       - "traefik.http.routers.bitwarden-websocket-router.entrypoints=http, https"
       - "traefik.http.routers.bitwarden-websocket-router.service=bitwarden-websocket"
+
+  gitea:
+    image: gitea/gitea:latest
+    restart: unless-stopped
+    networks:
+      - default
+      - postgres
+    environment:
+      - DB_TYPE=postgres
+      - DB_HOST=postgresdb:5432
+      - DB_NAME=gitea
+      - DB_USER=gitea
+      - DB_PASSWD=${GITEA_DB_PASSWD:-changeme}
+    volumes:
+      - /srv/data/gitea:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.gitea-service.loadbalancer.server.port=3000"
+      # Router
+      - "traefik.http.routers.gitea-router.rule=Host(`gitea.${PUBLIC_DOMAIN:-domain.tld}`)"
+      - "traefik.http.routers.gitea-router.entrypoints=http, https"
+      - "traefik.http.routers.gitea-router.service=gitea-service"
