@@ -1,0 +1,37 @@
+version: '3.5'
+
+networks:
+  postgres:
+    external: false
+    name: postgres
+  public:
+    external:
+      name: public
+
+services:
+  postgresdb:
+    image: postgres
+    restart: unless-stopped
+    volumes:
+      - /srv/data/postgresql/pgdata:/var/lib/postgresql
+    networks:
+      - postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@domain.tld}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-changeme}
+    volumes:
+      - /srv/data/postgresql/pgadmin:/root/.pgadmin
+    networks:
+      - postgres
+      - public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.${LOCAL_DOMAIN:-lan}`)"
+      - "traefik.http.routers.pgadmin.entrypoints=internal"
