@@ -41,6 +41,13 @@ services:
       - "--entrypoints.https.http.tls=true"
       - "--entryPoints.internal.address=:8443"
       - "--entrypoints.internal.http.tls=true"
+      # Lets encrypt
+      - "--entrypoints.https.http.tls.options=modern@file"
+      - "--entrypoints.https.http.tls.certResolver=letsencrypt"
+      - "--entrypoints.https.http.middlewares=security-headers@file"
+      - "--certificatesresolvers.letsencrypt.acme.email=${LETSENCRYPT_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/var/traefik/certs/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
 
     labels:
       - "traefik.enable=true"
