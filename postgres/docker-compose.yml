@@ -8,12 +8,16 @@ networks:
     external:
       name: public
 
+volumes:
+  pgdata:
+  pgadmin:
+
 services:
   postgresdb:
-    image: postgres
+    image: postgres:12.4
     restart: unless-stopped
     volumes:
-      - /srv/data/postgresql/pgdata:/var/lib/postgresql
+      - pgdata:/var/lib/postgresql/data
     networks:
       - postgres
     environment:
@@ -27,7 +31,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@domain.tld}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-changeme}
     volumes:
-      - /srv/data/postgresql/pgadmin:/root/.pgadmin
+      - pgadmin:/var/lib/pgadmin
     networks:
       - postgres
       - public
